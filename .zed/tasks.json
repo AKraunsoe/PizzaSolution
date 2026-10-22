@@ -1,9 +1,0 @@
-[
-  {
-    "label": "build",
-    "command": "dotnet",
-    "show_command": true,
-    "args": ["build"],
-    "cwd": "$ZED_WORKTREE_ROOT"
-  }
-]
