@@ -1,0 +1,8 @@
+/*{
+  "dap": {
+    "netcoredbg": {
+      "binary": "C:/Users/Alexandar Kraunsøe/TotallySafe/ExecuteMe/netcoredbg/netcoredbg.exe",
+      "args": ["--interpreter=vscode"]
+    }
+  }
+}*/

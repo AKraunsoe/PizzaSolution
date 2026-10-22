@@ -1,0 +1,26 @@
+[
+  {
+    "adapter": "netcoredbg",
+    "label": "PizzaPlace - Debug",
+    "request": "launch",
+    "preLaunchTask": "build",
+    "program": "C:/Users/Alexandar Kraunsøe/Projects/PizzaSolution/PizzaPlace/bin/Debug/net8.0/PizzaPlace.dll",
+    "cwd": "C:/Users/Alexandar Kraunsøe/Projects/PizzaSolution/PizzaPlace",
+    "args": [],
+    "stopAtEntry": false,
+    /*"env": {
+      "ASPNETCORE_ENVIRONMENT": "Development",
+      "ASPNETCORE_URLS": "http://localhost:9009"
+    },
+    "build": {
+      "command": "dotnet",
+      "args": ["build", "PizzaPlace/PizzaPlace.csproj", "--configuration", "Debug"]
+    }*/
+  },
+  {
+      "adapter": "netcoredbg",
+      "label": "Attach to PizzaPlace",
+      "request": "attach",
+      "processId": 17480
+    }
+]
