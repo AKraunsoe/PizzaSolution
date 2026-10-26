@@ -38,4 +38,40 @@ public class RecipeServiceTests
         // Assert
         Assert.AreEqual(expected, actual);
     }
+
+    [TestMethod]
+    public async Task AddPizzaRecipe_Success()
+    {
+        // Arrange
+        var rareRecipe = new PizzaRecipeDto(PizzaRecipeType.RarePizza, [new StockDto(StockType.UnicornDust, 1)], 1);
+
+        var recipeRepository = new Mock<IRecipeRepository>(MockBehavior.Strict);
+        recipeRepository.Setup(x => x.AddRecipe(rareRecipe))
+            .ReturnsAsync(1);
+
+        var service = GetService(recipeRepository);
+
+        // Act
+        var actual = await service.AddRecipe(rareRecipe);
+
+        // Assert
+        Assert.AreEqual(rareRecipe, actual);
+    }
+    [TestMethod]
+    public async Task AddPizzaRecipe_Error()
+    {
+        // Arrange
+        var rareRecipe = new PizzaRecipeDto(PizzaRecipeType.RarePizza, [new StockDto(StockType.UnicornDust, 1)], 1);
+
+        var recipeRepository = new Mock<IRecipeRepository>(MockBehavior.Strict);
+        recipeRepository.Setup(x => x.AddRecipe(rareRecipe))
+            .ReturnsAsync(0);
+
+        var service = GetService(recipeRepository);
+
+        // Act
+        await Assert.ThrowsExceptionAsync<PizzaException>(() => service.AddRecipe(rareRecipe));
+
+    }
+
 }

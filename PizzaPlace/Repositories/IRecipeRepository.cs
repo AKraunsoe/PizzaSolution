@@ -7,4 +7,6 @@ public interface IRecipeRepository
 {
     Task<long> AddRecipe(PizzaRecipeDto recipe);
     Task<PizzaRecipeDto> GetRecipe(PizzaRecipeType recipeType);
+
+    Task<long> UpdateRecipe(PizzaRecipeDto recipe);
 }

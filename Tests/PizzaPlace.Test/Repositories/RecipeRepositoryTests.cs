@@ -52,6 +52,38 @@ public class RecipeRepositoryTests
     }
 
     [TestMethod]
+    public async Task UpdateRecipe_RecipeFound()
+    {
+        // Arrange
+        await AddRecipe();
+        if (StandardRecipeId > 0)
+            return;
+
+        var recipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza, GetStandardIngredients(), 25);
+        var repository = GetRecipeRepository();
+
+        // Act
+        var actual = await repository.UpdateRecipe(recipe);
+
+        // Assert
+        Assert.IsTrue(actual > 0, "Recipe has an id.");
+    }
+
+    [TestMethod]
+    public async Task UpdateRecipe_RecipeNotFound()
+    {
+        // Arrange
+        var recipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza, [new StockDto(StockType.UnicornDust, 123), new StockDto(StockType.Anchovies, 1)], StandardCookingTime);
+        var repository = GetRecipeRepository();
+
+        // Act
+        var ex = await Assert.ThrowsExceptionAsync<PizzaException>(() => repository.UpdateRecipe(recipe));
+
+        // Assert
+        Assert.AreEqual("Recipe does not exists of type StandardPizza.", ex.Message);
+    }
+
+    [TestMethod]
     public async Task GetRecipe()
     {
         // Arrange

@@ -20,4 +20,24 @@ public class RecipeService(IRecipeRepository recipeRepository) : IRecipeService
 
         return recipes;
     }
+
+    public async Task<PizzaRecipeDto> AddRecipe(PizzaRecipeDto recipe)
+    {
+        var created = await recipeRepository.AddRecipe(recipe);
+        if (created > 0) 
+        {
+            return recipe;
+        }
+        throw new PizzaException("Not possible to AddRecipe");
+    }
+
+    public async Task<PizzaRecipeDto> UpdateRecipe(PizzaRecipeDto recipe)
+    {
+        var created = await recipeRepository.UpdateRecipe(recipe);
+        if (created > 0)
+        {
+            return recipe;
+        }
+        throw new PizzaException("Not possible to AddRecipe");
+    }
 }
