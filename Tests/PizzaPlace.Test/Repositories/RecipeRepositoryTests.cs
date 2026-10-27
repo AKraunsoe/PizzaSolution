@@ -7,7 +7,7 @@ namespace PizzaPlace.Test.Repositories;
 [TestClass]
 public class RecipeRepositoryTests
 {
-    private static IRecipeRepository GetRecipeRepository() => new FakeRecipeRepository();
+    private static Mock<IRecipeRepository> GetRecipeRepository() => new Mock<IRecipeRepository>(MockBehavior.Strict);
 
     private static ComparableList<StockDto> GetStandardIngredients() =>
     [
@@ -27,13 +27,15 @@ public class RecipeRepositoryTests
 
         var recipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza, GetStandardIngredients(), StandardCookingTime);
         var repository = GetRecipeRepository();
-
+        repository.Setup(x =>
+        x.AddRecipe(recipe)).ReturnsAsync(1);
         // Act
-        var actual = await repository.AddRecipe(recipe);
+        var actual = await repository.Object.AddRecipe(recipe);
 
         // Assert
         Assert.IsTrue(actual > 0, "Recipe has an id.");
         StandardRecipeId = actual;
+        repository.Verify(x => x.AddRecipe(recipe), Times.Once);
     }
 
     [TestMethod]
@@ -43,12 +45,14 @@ public class RecipeRepositoryTests
         await AddRecipe();
         var recipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza, [new StockDto(StockType.UnicornDust, 123), new StockDto(StockType.Anchovies, 1)], StandardCookingTime);
         var repository = GetRecipeRepository();
-
+        repository.Setup(x => x.AddRecipe(recipe))
+        .ThrowsAsync(new PizzaException("Recipe already added for StandardPizza."));
         // Act
-        var ex = await Assert.ThrowsExceptionAsync<PizzaException>(() => repository.AddRecipe(recipe));
+        var ex = await Assert.ThrowsExceptionAsync<PizzaException>(() => repository.Object.AddRecipe(recipe));
 
         // Assert
         Assert.AreEqual("Recipe already added for StandardPizza.", ex.Message);
+        repository.Verify(x => x.AddRecipe(recipe), Times.Once);
     }
 
     [TestMethod]
@@ -61,12 +65,16 @@ public class RecipeRepositoryTests
 
         var recipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza, GetStandardIngredients(), 25);
         var repository = GetRecipeRepository();
+        repository.Setup(x =>
+        x.UpdateRecipe(recipe)).ReturnsAsync(1);
 
         // Act
-        var actual = await repository.UpdateRecipe(recipe);
+        var actual = await repository.Object.UpdateRecipe(recipe);
 
         // Assert
         Assert.IsTrue(actual > 0, "Recipe has an id.");
+        repository.Verify(x => x.UpdateRecipe(recipe),
+        Times.Once);
     }
 
     [TestMethod]
@@ -75,12 +83,16 @@ public class RecipeRepositoryTests
         // Arrange
         var recipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza, [new StockDto(StockType.UnicornDust, 123), new StockDto(StockType.Anchovies, 1)], StandardCookingTime);
         var repository = GetRecipeRepository();
+        repository.Setup(x => x.UpdateRecipe(recipe))
+         .ThrowsAsync(new PizzaException("Recipe does not exists of type StandardPizza."));
 
         // Act
-        var ex = await Assert.ThrowsExceptionAsync<PizzaException>(() => repository.UpdateRecipe(recipe));
+        var ex = await Assert.ThrowsExceptionAsync<PizzaException>(() => repository.Object.UpdateRecipe(recipe));
 
         // Assert
         Assert.AreEqual("Recipe does not exists of type StandardPizza.", ex.Message);
+        repository.Verify(x => x.UpdateRecipe(recipe),
+        Times.Once);
     }
 
     [TestMethod]
@@ -91,12 +103,15 @@ public class RecipeRepositoryTests
         await AddRecipe();
         var expected = new PizzaRecipeDto(pizzaType, GetStandardIngredients(), StandardCookingTime, StandardRecipeId);
         var repository = GetRecipeRepository();
-
+        repository.Setup(x =>
+        x.GetRecipe(pizzaType)).ReturnsAsync(expected);
         // Act
-        var actual = await repository.GetRecipe(pizzaType);
+        var actual = await repository.Object.GetRecipe(pizzaType);
 
         // Assert
         Assert.AreEqual(expected, actual);
+        repository.Verify(x => x.GetRecipe(pizzaType),
+        Times.Once);
     }
 
     [TestMethod]
@@ -105,11 +120,15 @@ public class RecipeRepositoryTests
         // Arrange
         var pizzaType = PizzaRecipeType.ExtremelyTastyPizza;
         var repository = GetRecipeRepository();
+        repository.Setup(x => x.GetRecipe(pizzaType))
+        .ThrowsAsync(new PizzaException("Recipe does not exists of type ExtremelyTastyPizza."));
 
         // Act
-        var ex = await Assert.ThrowsExceptionAsync<PizzaException>(() => repository.GetRecipe(pizzaType));
+        var ex = await Assert.ThrowsExceptionAsync<PizzaException>(() => repository.Object.GetRecipe(pizzaType));
 
         // Assert
         Assert.AreEqual("Recipe does not exists of type ExtremelyTastyPizza.", ex.Message);
+        repository.Verify(x => x.GetRecipe(pizzaType),
+        Times.Once);
     }
 }

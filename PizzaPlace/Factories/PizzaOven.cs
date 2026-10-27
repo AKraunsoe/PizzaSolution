@@ -100,7 +100,8 @@ public abstract class PizzaOven(TimeProvider timeProvider) : IPizzaOven
             }
         }
 
-        static async Task<(Pizza?, Guid)> Wrap(Task<Pizza?> pizzaTask, Guid orderGuid) =>
-            (await pizzaTask, orderGuid);
+
     }
+    protected static async Task<(Pizza?, Guid)> Wrap(Task<Pizza?> pizzaTask, Guid orderGuid) =>
+        (await pizzaTask, orderGuid);
 }
