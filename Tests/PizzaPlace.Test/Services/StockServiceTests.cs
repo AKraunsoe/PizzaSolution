@@ -24,14 +24,14 @@ public class StockServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 1)
+            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 1)
         ];
         var order = new PizzaOrder(requests);
         var recipe = new PizzaRecipeDto(PizzaRecipeType.ExtremelyTastyPizza,
             [
                 new StockDto(StockType.Dough, 2),
                 new StockDto(StockType.Tomatoes, 1),
-            ], 10);
+            ], 10, 2);
         ComparableList<PizzaRecipeDto> recipes = [recipe];
 
         stockRepository.Setup(x => x.GetStock(StockType.Dough))
@@ -49,14 +49,14 @@ public class StockServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.ExtremelyTastyPizza, 1)
+            new PizzaAmount(PizzaRecipeType.ExtremelyTastyPizza, 1, 1)
         ];
         var order = new PizzaOrder(requests);
         var recipe = new PizzaRecipeDto(PizzaRecipeType.ExtremelyTastyPizza,
             [
                 new StockDto(StockType.Dough, 2),
                 new StockDto(StockType.Tomatoes, 1),
-            ], 10);
+            ], 10, 1);
         ComparableList<PizzaRecipeDto> recipes = [recipe];
 
         await Assert.ThrowsExceptionAsync<NullReferenceException>(() => stockService.GetStock(order, recipes));
@@ -69,14 +69,14 @@ public class StockServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 1)
+            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 1)
         ];
         var order = new PizzaOrder(requests);
         var recipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza,
             [
                 new StockDto(StockType.BellPeppers, 2),
                 new StockDto(StockType.GenericSpices, 1),
-            ], 10);
+            ], 10, 1);
         ComparableList<PizzaRecipeDto> recipes = [recipe];
 
         stockRepository.Setup(x => x.GetStock(StockType.BellPeppers))
@@ -98,14 +98,14 @@ public class StockServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 1)
+            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 1)
         ];
         var order = new PizzaOrder(requests);
         var recipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza,
             [
                 new StockDto(StockType.Dough, 2),
                 new StockDto(StockType.Tomatoes, 1),
-            ], 10);
+            ], 10, 1);
         ComparableList<PizzaRecipeDto> recipes = [recipe];
 
         stockRepository.Setup(x => x.GetStock(StockType.Dough))
@@ -128,14 +128,14 @@ public class StockServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 1)
+            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 1)
         ];
         var order = new PizzaOrder(requests);
         var recipe = new PizzaRecipeDto(PizzaRecipeType.ExtremelyTastyPizza,
             [
                 new StockDto(StockType.Dough, 2),
                 new StockDto(StockType.Tomatoes, 1),
-            ], 10);
+            ], 10, 2);
         ComparableList<PizzaRecipeDto> recipes = [recipe];
 
         stockRepository.Setup(x => x.GetStock(StockType.Dough))
@@ -153,14 +153,14 @@ public class StockServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 1)
+            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 1)
         ];
         var order = new PizzaOrder(requests);
         var recipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza,
             [
                 new StockDto(StockType.Dough, 300),
                 new StockDto(StockType.Tomatoes, 200),
-            ], 10);
+            ], 10, 1);
         ComparableList<PizzaRecipeDto> recipes = [recipe];
 
         stockRepository.Setup(x => x.GetStock(StockType.Dough))
@@ -180,14 +180,14 @@ public class StockServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 2)
+            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 2)
         ];
         var order = new PizzaOrder(requests);
         var recipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza,
             [
                 new StockDto(StockType.Bacon, 2),
                 new StockDto(StockType.UnicornDust, 1),
-            ], 10);
+            ], 10, 1);
         ComparableList<PizzaRecipeDto> recipes = [recipe];
 
         stockRepository.Setup(x => x.GetStock(StockType.Bacon))
@@ -208,14 +208,14 @@ public class StockServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 1)
+            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 1)
         ];
         var order = new PizzaOrder(requests);
         var recipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza,
             [
                 new StockDto(StockType.Dough, 2),
                 new StockDto(StockType.Tomatoes, 1),
-            ], 10);
+            ], 10, 1);
         ComparableList<PizzaRecipeDto> recipes = [recipe];
 
         stockRepository.Setup(x => x.GetStock(StockType.Dough))
@@ -236,14 +236,14 @@ public class StockServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 2)
+            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 2)
         ];
         var order = new PizzaOrder(requests);
         var recipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza,
             [
                 new StockDto(StockType.Dough, 2),
                 new StockDto(StockType.Tomatoes, 1),
-            ], 10);
+            ], 10, 1);
         ComparableList<PizzaRecipeDto> recipes = [recipe];
 
         stockRepository.Setup(x => x.GetStock(StockType.Dough))
@@ -264,20 +264,20 @@ public class StockServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 2),
-            new PizzaAmount(PizzaRecipeType.ExtremelyTastyPizza, 1)
+            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 2),
+            new PizzaAmount(PizzaRecipeType.ExtremelyTastyPizza, 2, 1)
         ];
         var order = new PizzaOrder(requests);
         var standardRecipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza,
             [
                 new StockDto(StockType.Dough, 2),
                 new StockDto(StockType.Tomatoes, 1),
-            ], 10);
+            ], 10, 1);
         var tastyRecipe = new PizzaRecipeDto(PizzaRecipeType.ExtremelyTastyPizza,
             [
                 new StockDto(StockType.Bacon, 2),
                 new StockDto(StockType.Tomatoes, 1),
-            ], 10);
+            ], 10, 2);
         ComparableList<PizzaRecipeDto> recipes = [standardRecipe, tastyRecipe];
 
         stockRepository.Setup(x => x.GetStock(StockType.Dough))
@@ -301,20 +301,20 @@ public class StockServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 2),
-            new PizzaAmount(PizzaRecipeType.ExtremelyTastyPizza, 1)
+            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 2),
+            new PizzaAmount(PizzaRecipeType.ExtremelyTastyPizza, 2, 1)
         ];
         var order = new PizzaOrder(requests);
         var standardRecipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza,
             [
                 new StockDto(StockType.Dough, 2),
                 new StockDto(StockType.Tomatoes, 1),
-            ], 10);
+            ], 10, 1);
         var tastyRecipe = new PizzaRecipeDto(PizzaRecipeType.ExtremelyTastyPizza,
             [
                 new StockDto(StockType.Bacon, 2),
                 new StockDto(StockType.Tomatoes, 1),
-            ], 10);
+            ], 10, 2);
         ComparableList<PizzaRecipeDto> recipes = [standardRecipe, tastyRecipe];
 
         stockRepository.Setup(x => x.GetStock(StockType.Dough))

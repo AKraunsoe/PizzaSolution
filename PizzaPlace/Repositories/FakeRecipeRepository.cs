@@ -11,9 +11,6 @@ public class FakeRecipeRepository : FakeDatabase<PizzaRecipeDto>, IRecipeReposit
     {
         lock (_lock)
         {
-            if (Get(x => x.RecipeType == recipe.RecipeType).Any())
-                throw new PizzaException($"Recipe already added for {recipe.RecipeType}.");
-
             var id = Insert(recipe);
             return Task.FromResult(id);
         }
@@ -21,23 +18,25 @@ public class FakeRecipeRepository : FakeDatabase<PizzaRecipeDto>, IRecipeReposit
 
     public Task<long> UpdateRecipe(PizzaRecipeDto recipe)
     {
-        var foundRecipe = Get(x => x.RecipeType == recipe.RecipeType)
-            .FirstOrDefault() ?? throw new PizzaException($"Recipe does not exists of type {recipe.RecipeType}.");
-
         lock (_lock)
         { 
-            Update(recipe, foundRecipe.Id);
-            return Task.FromResult(foundRecipe.Id);
+            if (Get(recipe.Id) is null)
+                throw new PizzaException($"Recipe does not exist with id {recipe.Id}.");
+
+            Update(recipe, recipe.Id);
+            return Task.FromResult(recipe.Id);
         }
     }
 
-    public Task<PizzaRecipeDto> GetRecipe(PizzaRecipeType recipeType)
+    public Task<PizzaRecipeDto> GetRecipe(long id)
     {
-        var recipe = Get(x => x.RecipeType == recipeType)
-            .FirstOrDefault() ?? throw new PizzaException($"Recipe does not exists of type {recipeType}.");
+        var recipe = Get(id) ?? throw new PizzaException($"Recipe does not exist with id {id}.");
 
         return Task.FromResult(recipe);
     }
+
+    public Task<ComparableList<PizzaRecipeDto>> GetRecipes() =>
+        Task.FromResult(new ComparableList<PizzaRecipeDto>(Get(_ => true)));
 
 
 

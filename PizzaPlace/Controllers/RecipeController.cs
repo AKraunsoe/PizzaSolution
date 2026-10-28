@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PizzaPlace.Models;
-using PizzaPlace.Models.Types;
 using PizzaPlace.Services;
 
 namespace PizzaPlace.Controllers;
@@ -10,8 +9,23 @@ public class RecipeController(
     IRecipeService recipeService) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> AddPizzaRecipe([FromBody] PizzaRecipeDto recipe)
+    public async Task<IActionResult> AddPizzaRecipe([FromBody] CreatePizzaRecipeRequest request)
     {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values
+                        .SelectMany(value => value.Errors)
+                        .Select(error => error.ErrorMessage);
+
+            return BadRequest();
+        }
+
+        var recipe = new PizzaRecipeDto(
+            request.RecipeType,
+            new ComparableList<StockDto>(request.Ingredients
+                .Select(ingredient => new StockDto(ingredient.StockType, ingredient.Amount))),
+            request.CookingTimeMinutes);
+
         return Ok(new
         {
             recipe = await recipeService.AddRecipe(recipe)
@@ -27,4 +41,3 @@ public class RecipeController(
         });
     }
 }
-

@@ -7,26 +7,29 @@ public class RecipeService(IRecipeRepository recipeRepository) : IRecipeService
 {
     public async Task<ComparableList<PizzaRecipeDto>> GetPizzaRecipes(PizzaOrder order)
     {
-        var pizzaTypes = order.RequestedOrder
-            .Select(x => x.PizzaType)
+        var recipeIds = order.RequestedOrder
+            .Select(x => x.RecipeId)
             .Distinct()
             .ToList();
 
         ComparableList<PizzaRecipeDto> recipes = [];
-        foreach (var pizzaType in pizzaTypes)
+        foreach (var recipeId in recipeIds)
         {
-            recipes.Add(await recipeRepository.GetRecipe(pizzaType));
+            recipes.Add(await recipeRepository.GetRecipe(recipeId));
         }
 
         return recipes;
     }
+
+    public Task<ComparableList<PizzaRecipeDto>> GetRecipes() =>
+        recipeRepository.GetRecipes();
 
     public async Task<PizzaRecipeDto> AddRecipe(PizzaRecipeDto recipe)
     {
         var created = await recipeRepository.AddRecipe(recipe);
         if (created > 0) 
         {
-            return recipe;
+            return recipe with { Id = created };
         }
         throw new PizzaException("Not possible to AddRecipe");
     }
@@ -36,7 +39,7 @@ public class RecipeService(IRecipeRepository recipeRepository) : IRecipeService
         var created = await recipeRepository.UpdateRecipe(recipe);
         if (created > 0)
         {
-            return recipe;
+            return recipe with { Id = created };
         }
         throw new PizzaException("Not possible to AddRecipe");
     }

@@ -1,6 +1,7 @@
 ﻿using PizzaPlace.Models;
 using PizzaPlace.Models.Types;
 using PizzaPlace.Repositories;
+using PizzaPlace.Extensions;
 
 namespace PizzaPlace.Services;
 
@@ -8,19 +9,30 @@ public class StockService(IStockRepository stockRepository) : IStockService
 {
     public async Task<bool> HasInsufficientStock(PizzaOrder order, ComparableList<PizzaRecipeDto> recipeDtos)
     {
+        var prepareOrders = order.RequestedOrder
+            .GroupBy(request => request.RecipeId)
+            .Select(requests =>
+            {
+                var recipe = recipeDtos.FirstOrDefault(recipe => recipe.Id == requests.Key)
+                    ?? throw new NullReferenceException($"Cannot check stock for missing recipe id {requests.Key}.");
+                return new PizzaPrepareOrder(recipe, requests.Sum(request => (int)request.Amount));
+            });
+        var requiredStock = prepareOrders.GetRequiredStock();
+
         var stock = await GetStock(order, recipeDtos);
-        var storage = new Dictionary<StockType, int>();
+        return !PizzaHelperExtensions.HasEnough(stock, requiredStock);
+        /*var storage = new Dictionary<StockType, int>();
 
         for (int i = 0; i < order.RequestedOrder.Count; i++)
         {
-            var pizzaType = order.RequestedOrder[i].PizzaType;
+            var recipeId = order.RequestedOrder[i].RecipeId;
             var quant = order.RequestedOrder[i].Amount;
             if (quant > 0)
             {
-                var recipe = recipeDtos.FirstOrDefault(r => r.RecipeType == pizzaType);
+                var recipe = recipeDtos.FirstOrDefault(r => r.Id == recipeId);
                 if (recipe == null)
                 {
-                    throw new NullReferenceException("Cannot check stock for non existant Pizza");
+                    throw new NullReferenceException($"Cannot check stock for missing recipe id {recipeId}.");
                 }
 
                 for (int j = 0; j < recipe.Ingredients.Count; j++)
@@ -51,7 +63,7 @@ public class StockService(IStockRepository stockRepository) : IStockService
             }
         }
 
-        return false;
+        return false;*/
 
     }
 
@@ -60,14 +72,14 @@ public class StockService(IStockRepository stockRepository) : IStockService
         var result = new ComparableList<StockDto>();
         for (int i = 0; i < order.RequestedOrder.Count; i++)
         {
-            var pizzaType = order.RequestedOrder[i].PizzaType;
+            var recipeId = order.RequestedOrder[i].RecipeId;
             var quant = order.RequestedOrder[i].Amount;
             if (quant > 0)
             {
-                var recipe = recipeDtos.FirstOrDefault(r => r.RecipeType == pizzaType);
+                var recipe = recipeDtos.FirstOrDefault(r => r.Id == recipeId);
                 if (recipe == null)
                 {
-                    throw new NullReferenceException("Cannot check stock for non existant Pizza");
+                    throw new NullReferenceException($"Cannot check stock for missing recipe id {recipeId}.");
                 }
 
                 for (int j = 0; j < recipe.Ingredients.Count; j++)

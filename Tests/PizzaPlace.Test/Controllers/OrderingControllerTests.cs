@@ -16,7 +16,7 @@ public class OrderingControllerTests
     public async Task PlacePizzaOrder()
     {
         // Arrange
-        var order = new PizzaOrder([new PizzaAmount(PizzaRecipeType.EmptyPizza, 1)]);
+        var order = new PizzaOrder([new PizzaAmount(PizzaRecipeType.EmptyPizza, 1, 1)]);
 
         var orderingService = new Mock<IOrderingService>(MockBehavior.Strict);
         orderingService.Setup(x => x.HandlePizzaOrder(order))

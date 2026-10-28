@@ -18,22 +18,22 @@ public class OrderingServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 54),
-            new PizzaAmount(PizzaRecipeType.ExtremelyTastyPizza, 2),
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 0),
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 4),
+            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 54),
+            new PizzaAmount(PizzaRecipeType.ExtremelyTastyPizza, 2, 2),
+            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 0),
+            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 4),
         ];
         var order = new PizzaOrder(requests);
         var standardRecipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza,
             [
                 new StockDto(StockType.Dough, 2),
                 new StockDto(StockType.Tomatoes, 1),
-            ], 10);
+            ], 10, 1);
         var tastyRecipe = new PizzaRecipeDto(PizzaRecipeType.ExtremelyTastyPizza,
             [
                 new StockDto(StockType.UnicornDust, 1),
                 new StockDto(StockType.BellPeppers, 2),
-            ], 15);
+            ], 15, 2);
         ComparableList<PizzaRecipeDto> recipes = [standardRecipe, tastyRecipe];
         ComparableList<StockDto> returnedStock = [new StockDto(StockType.Anchovies, 2)]; // Doesn't matter that it doesn't match recipes.
         ComparableList<PizzaPrepareOrder> prepareOrders =
@@ -78,14 +78,14 @@ public class OrderingServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.ExtremelyTastyPizza, 2),
+            new PizzaAmount(PizzaRecipeType.ExtremelyTastyPizza, 2, 2),
         ];
         var order = new PizzaOrder(requests);
         var tastyRecipe = new PizzaRecipeDto(PizzaRecipeType.ExtremelyTastyPizza,
             [
                 new StockDto(StockType.UnicornDust, 1),
                 new StockDto(StockType.BellPeppers, 2),
-            ], 15);
+            ], 15, 2);
         ComparableList<PizzaRecipeDto> recipes = [tastyRecipe];
 
         var stockService = new Mock<IStockService>(MockBehavior.Strict);
@@ -115,7 +115,7 @@ public class OrderingServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 1),
+            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 1),
         ];
         var order = new PizzaOrder(requests);
         ComparableList<PizzaRecipeDto> recipes = [];
@@ -138,7 +138,7 @@ public class OrderingServiceTests
         var ex = await Assert.ThrowsExceptionAsync<PizzaException>(() => service.HandlePizzaOrder(order));
 
         // Assert
-        Assert.AreEqual("Missing recipe. Recipe service did not return a recipe for StandardPizza which was expected.", ex.Message);
+        Assert.AreEqual("Missing recipe. Recipe service did not return a recipe for id 1 which was expected.", ex.Message);
         stockService.VerifyAll();
         recipeService.VerifyAll();
         pizzaOven.VerifyAll();

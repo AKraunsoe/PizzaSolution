@@ -1,12 +1,12 @@
 ﻿using PizzaPlace.Models;
-using PizzaPlace.Models.Types;
 
 namespace PizzaPlace.Repositories;
 
 public interface IRecipeRepository
 {
     Task<long> AddRecipe(PizzaRecipeDto recipe);
-    Task<PizzaRecipeDto> GetRecipe(PizzaRecipeType recipeType);
+    Task<PizzaRecipeDto> GetRecipe(long id);
+    Task<ComparableList<PizzaRecipeDto>> GetRecipes();
 
     Task<long> UpdateRecipe(PizzaRecipeDto recipe);
 }

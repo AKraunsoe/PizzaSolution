@@ -16,18 +16,18 @@ public class RecipeServiceTests
     {
         // Arrange
         var order = new PizzaOrder([
-            new PizzaAmount(PizzaRecipeType.RarePizza, 1),
-            new PizzaAmount(PizzaRecipeType.OddPizza, 2),
-            new PizzaAmount(PizzaRecipeType.RarePizza, 20),
+            new PizzaAmount(PizzaRecipeType.RarePizza, 11, 1),
+            new PizzaAmount(PizzaRecipeType.OddPizza, 12, 2),
+            new PizzaAmount(PizzaRecipeType.RarePizza, 11, 20),
         ]);
-        var rareRecipe = new PizzaRecipeDto(PizzaRecipeType.RarePizza, [new StockDto(StockType.UnicornDust, 1)], 1);
-        var oddRecipe = new PizzaRecipeDto(PizzaRecipeType.OddPizza, [new StockDto(StockType.Sulphur, 10)], 100);
+        var rareRecipe = new PizzaRecipeDto(PizzaRecipeType.RarePizza, [new StockDto(StockType.UnicornDust, 1)], 1, 11);
+        var oddRecipe = new PizzaRecipeDto(PizzaRecipeType.OddPizza, [new StockDto(StockType.Sulphur, 10)], 100, 12);
         ComparableList<PizzaRecipeDto> expected = [rareRecipe, oddRecipe];
 
         var recipeRepository = new Mock<IRecipeRepository>(MockBehavior.Strict);
-        recipeRepository.Setup(x => x.GetRecipe(PizzaRecipeType.RarePizza))
+        recipeRepository.Setup(x => x.GetRecipe(11))
             .ReturnsAsync(rareRecipe);
-        recipeRepository.Setup(x => x.GetRecipe(PizzaRecipeType.OddPizza))
+        recipeRepository.Setup(x => x.GetRecipe(12))
             .ReturnsAsync(oddRecipe);
 
         var service = GetService(recipeRepository);
@@ -55,7 +55,7 @@ public class RecipeServiceTests
         var actual = await service.AddRecipe(rareRecipe);
 
         // Assert
-        Assert.AreEqual(rareRecipe, actual);
+        Assert.AreEqual(rareRecipe with { Id = 1 }, actual);
     }
     [TestMethod]
     public async Task AddPizzaRecipe_Error()
@@ -78,11 +78,11 @@ public class RecipeServiceTests
     public async Task UpdatePizzaRecipe_Success()
     {
         // Arrange
-        var rareRecipe = new PizzaRecipeDto(PizzaRecipeType.RarePizza, [new StockDto(StockType.UnicornDust, 1)], 1);
+        var rareRecipe = new PizzaRecipeDto(PizzaRecipeType.RarePizza, [new StockDto(StockType.UnicornDust, 1)], 1, 42);
 
         var recipeRepository = new Mock<IRecipeRepository>(MockBehavior.Strict);
         recipeRepository.Setup(x => x.UpdateRecipe(rareRecipe))
-            .ReturnsAsync(1);
+            .ReturnsAsync(42);
 
         var service = GetService(recipeRepository);
 

@@ -30,34 +30,33 @@ public class MenuService : IMenuService
             {
                 case 0:
                 case 1:
-                    items.Add(new MenuItem($"Standard Pizza {size}", Models.Types.PizzaRecipeType.StandardPizza, lunchMenu ? 40*(i%2 == 0 ? 1 : 1.5) : 80 * (i % 2 == 0 ? 1 : 1.5), soldOut));
+                    items.Add(new MenuItem($"Standard Pizza {size}", i, Models.Types.PizzaRecipeType.StandardPizza, lunchMenu ? 40*(i%2 == 0 ? 1 : 1.5) : 80 * (i % 2 == 0 ? 1 : 1.5), soldOut));
                     break;
                 case 2:
                 case 3:
-                    items.Add(new MenuItem($"Extremely Tasty Pizza {size}", Models.Types.PizzaRecipeType.ExtremelyTastyPizza, lunchMenu ? 50 * (i % 2 == 0 ? 1 : 1.5) : 100 * (i % 2 == 0 ? 1 : 1.5), soldOut));
+                    items.Add(new MenuItem($"Extremely Tasty Pizza {size}", i, Models.Types.PizzaRecipeType.ExtremelyTastyPizza, lunchMenu ? 50 * (i % 2 == 0 ? 1 : 1.5) : 100 * (i % 2 == 0 ? 1 : 1.5), soldOut));
                     break;
                 case 4:
                 case 5:
-                    items.Add(new MenuItem($"Odd Pizza {size}", Models.Types.PizzaRecipeType.OddPizza, lunchMenu ? 45 * (i % 2 == 0 ? 1 : 1.5) : 90 * (i % 2 == 0 ? 1 : 1.5), soldOut));
+                    items.Add(new MenuItem($"Odd Pizza {size}", i, Models.Types.PizzaRecipeType.OddPizza, lunchMenu ? 45 * (i % 2 == 0 ? 1 : 1.5) : 90 * (i % 2 == 0 ? 1 : 1.5), soldOut));
                     break;
                 case 6:
                 case 7:
-                    items.Add(new MenuItem($"Rare Pizza {size}", Models.Types.PizzaRecipeType.RarePizza, lunchMenu ? 60 * (i % 2 == 0 ? 1 : 1.5) : 120 * (i % 2 == 0 ? 1 : 1.5), soldOut));
+                    items.Add(new MenuItem($"Rare Pizza {size}", i, Models.Types.PizzaRecipeType.RarePizza, lunchMenu ? 60 * (i % 2 == 0 ? 1 : 1.5) : 120 * (i % 2 == 0 ? 1 : 1.5), soldOut));
                     break;
                 case 8:
                 case 9:
-                    items.Add(new MenuItem($"Horse Radish Pizza {size}", Models.Types.PizzaRecipeType.HorseRadishPizza, lunchMenu ? 5 * (i % 2 == 0 ? 1 : 1.5) : 10 * (i % 2 == 0 ? 1 : 1.5), soldOut));
+                    items.Add(new MenuItem($"Horse Radish Pizza {size}", i, Models.Types.PizzaRecipeType.HorseRadishPizza, lunchMenu ? 5 * (i%2 == 0 ? 1 : 1.5) : 10 * (i % 2 == 0 ? 1 : 1.5), soldOut));
                     break;
                 case 10:
                 case 11:
-                    items.Add(new MenuItem($"Empty Pizza {size}", Models.Types.PizzaRecipeType.EmptyPizza, lunchMenu ? 20 * (i % 2 == 0 ? 1 : 1.5) : 40 * (i % 2 == 0 ? 1 : 1.5), soldOut));
+                    items.Add(new MenuItem($"Empty Pizza {size}", i, Models.Types.PizzaRecipeType.EmptyPizza, lunchMenu ? 20 * (i%2 == 0 ? 1 : 1.5) : 40 * (i % 2 == 0 ? 1 : 1.5), soldOut));
                     break;
                }
-        
+
         }
         string menuTitle = lunchMenu ? "Today's Lunch Menu" : "Today's Menu";
         return new Menu($"{menuTitle}", items);
 
     }
 }
- 

@@ -2,4 +2,4 @@
 
 namespace PizzaPlace;
 
-public record PizzaAmount(PizzaRecipeType PizzaType, ushort Amount);
+public record PizzaAmount(PizzaRecipeType PizzaType, long RecipeId, ushort Amount);
