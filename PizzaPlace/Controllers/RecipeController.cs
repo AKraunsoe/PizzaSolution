@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PizzaPlace.Extensions;
 using PizzaPlace.Models;
 using PizzaPlace.Services;
 
@@ -11,13 +12,11 @@ public class RecipeController(
     [HttpPost]
     public async Task<IActionResult> AddPizzaRecipe([FromBody] CreatePizzaRecipeRequest request)
     {
-        if (!ModelState.IsValid)
+        var validationErrors = ModelState.GetRecipeValidationErrors(
+            request.Ingredients.Select(ingredient => ingredient.StockType));
+        if (validationErrors is not null)
         {
-            var errors = ModelState.Values
-                        .SelectMany(value => value.Errors)
-                        .Select(error => error.ErrorMessage);
-
-            return BadRequest();
+            return BadRequest(validationErrors);
         }
 
         var recipe = new PizzaRecipeDto(
@@ -35,6 +34,18 @@ public class RecipeController(
     [HttpPut]
     public async Task<IActionResult> UpdatePizzaRecipe([FromBody] PizzaRecipeDto recipe)
     {
+        if (recipe.Id <= 0)
+        {
+            ModelState.AddModelError(nameof(recipe.Id), "Recipe id must be greater than 0.");
+        }
+
+        var validationErrors = ModelState.GetRecipeValidationErrors(
+            recipe.Ingredients.Select(ingredient => ingredient.StockType));
+        if (validationErrors is not null)
+        {
+            return BadRequest(validationErrors);
+        }
+
         return Ok(new
         {
             recipe = await recipeService.UpdateRecipe(recipe)

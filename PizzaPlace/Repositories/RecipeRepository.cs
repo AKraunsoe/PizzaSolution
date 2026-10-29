@@ -10,18 +10,36 @@ public class RecipeRepository(NpgsqlDataSource dataSource) : IRecipeRepository
     public async Task<long> AddRecipe(PizzaRecipeDto recipe)
     {
         await using var connection = await dataSource.OpenConnectionAsync();
-        await using var command = new NpgsqlCommand(
+        await using var insertRecipe = new NpgsqlCommand(
             """
-            INSERT INTO recipes (recipe_type, ingredients, cooking_time_minutes)
-            VALUES (@recipeType, @ingredients, @cookingTimeMinutes)
+            INSERT INTO recipes (recipe_type, cooking_time_minutes)
+            VALUES (@recipeType, @cookingTimeMinutes)
             RETURNING id;
             """,
             connection);
-        command.Parameters.AddWithValue("recipeType", recipe.RecipeType.ToString());
-        command.Parameters.Add("ingredients", NpgsqlDbType.Jsonb).Value = JsonSerializer.Serialize(recipe.Ingredients.ToList());
-        command.Parameters.AddWithValue("cookingTimeMinutes", recipe.CookingTimeMinutes);
+        insertRecipe.Parameters.AddWithValue("recipeType", recipe.RecipeType.ToString());
+        insertRecipe.Parameters.AddWithValue("cookingTimeMinutes", recipe.CookingTimeMinutes);
 
-        var id = await command.ExecuteScalarAsync();
+        var id = await insertRecipe.ExecuteScalarAsync();
+
+        foreach(var ingredient in recipe.Ingredients){
+            await using var insertIngredient = new NpgsqlCommand(
+                """
+                INSERT INTO ingredients (stock_type, amount, recipe_id)
+                VALUES (@stockType, @amount, @id)
+                RETURNING id;
+
+                """, connection);
+            insertIngredient.Parameters.AddWithValue("stockType", ingredient.StockType.ToString());
+            insertIngredient.Parameters.AddWithValue("amount", ingredient.Amount);
+            insertIngredient.Parameters.AddWithValue("id", id);
+
+            var ingredientId = await insertIngredient.ExecuteScalarAsync();
+            if (!(ingredientId is long stockId)){
+                throw new InvalidOperationException("The database did not return the new ingredient ID.");
+            }
+        }
+
         return id is long recipeId
             ? recipeId
             : throw new InvalidOperationException("The database did not return the new recipe ID.");
