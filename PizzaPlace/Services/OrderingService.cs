@@ -1,6 +1,5 @@
 ﻿using PizzaPlace.Factories;
 using PizzaPlace.Models;
-using PizzaPlace.Models.Types;
 using PizzaPlace.Pizzas;
 
 namespace PizzaPlace.Services;
@@ -13,17 +12,17 @@ public class OrderingService(
     public async Task<IEnumerable<Pizza>> HandlePizzaOrder(PizzaOrder order)
     {
         var recipes = await recipeService.GetPizzaRecipes(order);
-        if (await stockService.HasInsufficientStock(order, recipes))
+        var stock = await stockService.GetStock(order, recipes);
+        if (await stockService.HasInsufficientStock(order, recipes, stock))
             throw new PizzaException("Unable to take in order. Insufficient stock.");
 
-        var stock = await stockService.GetStock(order, recipes);
-
+        await stockService.TakeStock(stock);
         var prepareOrder = order.RequestedOrder
             .GroupBy(x => x.RecipeId)
             .Select(x => new PizzaPrepareOrder(GetPizzaRecipe(x.Key, recipes), x.Aggregate(0, (total, request) => total + request.Amount)))
             .ToComparableList();
 
-        return await pizzaOven.PreparePizzas(prepareOrder, stock);
+        return await pizzaOven.PreparePizzas(prepareOrder);
 
         PizzaRecipeDto GetPizzaRecipe(long recipeId, ComparableList<PizzaRecipeDto> recipes) =>
             recipes.FirstOrDefault(x => x.Id == recipeId) ??

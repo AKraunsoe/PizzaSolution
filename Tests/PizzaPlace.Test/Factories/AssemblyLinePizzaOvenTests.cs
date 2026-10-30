@@ -19,14 +19,12 @@ public class AssemblyLinePizzaOvenTests
         {
             new PizzaPrepareOrder(NormalPizzaOvenTests.GetTestStandardPizzaRecipe(), 1),
         };
-        var stock = NormalPizzaOvenTests.GetPlentyStock();
-
         var oven = GetOven(timeProvider);
         var expectedTime = NormalPizzaOvenTests.StandardPizzaPrepareTime + AssemblyLinePizzaOven.SetupTimeMinutes;
         var expectedPizzas = 1;
 
         // Act
-        var pizzasTask = oven.PreparePizzas(order, stock);
+        var pizzasTask = oven.PreparePizzas(order);
         timeProvider.PassTimeInMinuteIntervals(expectedTime - 1);
         var firstCheck = pizzasTask.IsCompleted;
         timeProvider.PassTimeInMinuteIntervals(1);
@@ -49,8 +47,6 @@ public class AssemblyLinePizzaOvenTests
         [
             new PizzaPrepareOrder(NormalPizzaOvenTests.GetTestTastyPizzaRecipe(), 23),
         ];
-        var stock = NormalPizzaOvenTests.GetPlentyStock();
-
         var oven = GetOven(timeProvider);
         // NormalPizzaOvenTests.TastyPizzaPrepareTime + AssemblyLinePizzaOven.SetupTimeMinutes = 22
         // AssemblyLinePizzaOven.SubsequentPizzaTimeSavingsInMinutes = 5
@@ -63,7 +59,7 @@ public class AssemblyLinePizzaOvenTests
         var expectedPizzas = 23;
 
         // Act
-        var pizzasTask = oven.PreparePizzas(order, stock);
+        var pizzasTask = oven.PreparePizzas(order);
         timeProvider.PassTimeInMinuteIntervals(expectedTime - 1);
         var firstCheck = pizzasTask.IsCompleted;
         timeProvider.PassTimeInMinuteIntervals(1);
@@ -87,8 +83,6 @@ public class AssemblyLinePizzaOvenTests
             new PizzaPrepareOrder(NormalPizzaOvenTests.GetTestTastyPizzaRecipe(), 10),
             new PizzaPrepareOrder(NormalPizzaOvenTests.GetTestStandardPizzaRecipe(), 7),
         ];
-        var stock = NormalPizzaOvenTests.GetPlentyStock();
-
         var oven = GetOven(timeProvider);
         var expectedTime = new[] {22, 17, 12, 7, 4,
             4, 4, 4, 4, 4,
@@ -97,7 +91,7 @@ public class AssemblyLinePizzaOvenTests
         var expectedPizzas = 17;
 
         // Act
-        var pizzasTask = oven.PreparePizzas(order, stock);
+        var pizzasTask = oven.PreparePizzas(order);
         timeProvider.PassTimeInMinuteIntervals(expectedTime - 1);
         var firstCheck = pizzasTask.IsCompleted;
         timeProvider.PassTimeInMinuteIntervals(1);
@@ -124,12 +118,11 @@ public class AssemblyLinePizzaOvenTests
             new PizzaPrepareOrder(NormalPizzaOvenTests.GetTestStandardPizzaRecipe(), 1),
             new PizzaPrepareOrder(NormalPizzaOvenTests.GetTestTastyPizzaRecipe(), 1),
         ];
-        var stock = NormalPizzaOvenTests.GetPlentyStock();
         var oven = GetOven(timeProvider);
         var expectedTime = 17 + 22 + 12 + 17;
 
         // Act
-        var pizzasTask = oven.PreparePizzas(order, stock);
+        var pizzasTask = oven.PreparePizzas(order);
         timeProvider.PassTimeInMinuteIntervals(expectedTime - 1);
         var isCompletedBeforeExpectedTime = pizzasTask.IsCompleted;
         timeProvider.PassTimeInMinuteIntervals(1);

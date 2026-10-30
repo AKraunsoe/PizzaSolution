@@ -43,4 +43,8 @@ public class RecipeService(IRecipeRepository recipeRepository) : IRecipeService
         }
         throw new PizzaException("Not possible to UpdateRecipe");
     }
+
+    public Task<PizzaRecipeDto> GetRecipe(long id) =>
+     recipeRepository.GetRecipe(id);
+
 }

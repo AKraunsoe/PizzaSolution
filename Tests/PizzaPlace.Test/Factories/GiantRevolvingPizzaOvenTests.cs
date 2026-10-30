@@ -19,14 +19,12 @@ public class GiantRevolvingPizzaOvenTests
         [
             new PizzaPrepareOrder(NormalPizzaOvenTests.GetTestStandardPizzaRecipe(), 100),
         ];
-        var stock = NormalPizzaOvenTests.GetPlentyStock();
-
         var oven = GetOven(timeProvider);
         var expectedTime = NormalPizzaOvenTests.StandardPizzaPrepareTime;
         var expectedPizzas = 100;
 
         // Act
-        var pizzasTask = oven.PreparePizzas(order, stock);
+        var pizzasTask = oven.PreparePizzas(order);
         timeProvider.PassTimeInMinuteIntervals(expectedTime - 1);
         var firstCheck = pizzasTask.IsCompleted;
         timeProvider.PassTimeInMinuteIntervals(1);
@@ -49,14 +47,12 @@ public class GiantRevolvingPizzaOvenTests
         [
             new PizzaPrepareOrder(NormalPizzaOvenTests.GetTestStandardPizzaRecipe(), 241),
         ];
-        var stock = NormalPizzaOvenTests.GetPlentyStock();
-
         var oven = GetOven(timeProvider);
         var expectedTime = NormalPizzaOvenTests.StandardPizzaPrepareTime * 3;
         var expectedPizzas = 241;
 
         // Act
-        var pizzasTask = oven.PreparePizzas(order, stock);
+        var pizzasTask = oven.PreparePizzas(order);
         timeProvider.PassTimeInMinuteIntervals(expectedTime - 1);
         var firstCheck = pizzasTask.IsCompleted;
         timeProvider.PassTimeInMinuteIntervals(1);
@@ -80,14 +76,12 @@ public class GiantRevolvingPizzaOvenTests
             new PizzaPrepareOrder(NormalPizzaOvenTests.GetTestStandardPizzaRecipe(), 120),
             new PizzaPrepareOrder(NormalPizzaOvenTests.GetTestTastyPizzaRecipe(), 1),
         ];
-        var stock = NormalPizzaOvenTests.GetPlentyStock();
-
         var oven = GetOven(timeProvider);
         var expectedTime = NormalPizzaOvenTests.StandardPizzaPrepareTime
             + NormalPizzaOvenTests.TastyPizzaPrepareTime;
 
         // Act
-        var pizzasTask = oven.PreparePizzas(order, stock);
+        var pizzasTask = oven.PreparePizzas(order);
         timeProvider.PassTimeInMinuteIntervals(expectedTime - 1);
         var firstCheck = pizzasTask.IsCompleted;
         timeProvider.PassTimeInMinuteIntervals(1);
@@ -112,14 +106,12 @@ public class GiantRevolvingPizzaOvenTests
             new PizzaPrepareOrder(NormalPizzaOvenTests.GetTestStandardPizzaRecipe(), 99),
             new PizzaPrepareOrder(NormalPizzaOvenTests.GetTestTastyPizzaRecipe(), 120),
         ];
-        var stock = NormalPizzaOvenTests.GetPlentyStock();
-
         var oven = GetOven(timeProvider);
         var expectedTime = NormalPizzaOvenTests.StandardPizzaPrepareTime
             + NormalPizzaOvenTests.TastyPizzaPrepareTime;
 
         // Act
-        var pizzasTask = oven.PreparePizzas(order, stock);
+        var pizzasTask = oven.PreparePizzas(order);
         timeProvider.PassTimeInMinuteIntervals(expectedTime - 1);
         var firstCheck = pizzasTask.IsCompleted;
         timeProvider.PassTimeInMinuteIntervals(1);
@@ -145,14 +137,12 @@ public class GiantRevolvingPizzaOvenTests
             new PizzaPrepareOrder(NormalPizzaOvenTests.GetTestTastyPizzaRecipe(), 1),
             new PizzaPrepareOrder(NormalPizzaOvenTests.GetTestStandardPizzaRecipe(), 1),
         ];
-        var stock = NormalPizzaOvenTests.GetPlentyStock();
-
         var oven = GetOven(timeProvider);
         var expectedTime = NormalPizzaOvenTests.StandardPizzaPrepareTime + NormalPizzaOvenTests.TastyPizzaPrepareTime;
         var expectedPizzas = 3;
 
         // Act
-        var pizzasTask = oven.PreparePizzas(order, stock);
+        var pizzasTask = oven.PreparePizzas(order);
         timeProvider.PassTimeInMinuteIntervals(expectedTime - 1);
         var firstCheck = pizzasTask.IsCompleted;
         timeProvider.PassTimeInMinuteIntervals(1);

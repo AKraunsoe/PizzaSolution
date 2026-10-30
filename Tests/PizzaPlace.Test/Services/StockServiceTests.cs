@@ -123,7 +123,7 @@ public class StockServiceTests
     }
 
     [TestMethod]
-    public async Task HasInSufficientStock_RecipeNotFound()
+    public async Task GetStock_RecipeNotFound()
     {
         // Arrange
         ComparableList<PizzaAmount> requests =
@@ -138,12 +138,8 @@ public class StockServiceTests
             ], 10, 2);
         ComparableList<PizzaRecipeDto> recipes = [recipe];
 
-        stockRepository.Setup(x => x.GetStock(StockType.Dough))
-            .ReturnsAsync(new StockDto(StockType.Dough, 4));
-        stockRepository.Setup(x => x.GetStock(StockType.Tomatoes))
-            .ReturnsAsync(new StockDto(StockType.Tomatoes, 4));
-
-        await Assert.ThrowsExceptionAsync<NullReferenceException>(() => stockService.HasInsufficientStock(order, recipes));
+        await Assert.ThrowsExceptionAsync<NullReferenceException>(
+            () => stockService.GetStock(order, recipes));
 
     }
 
@@ -168,7 +164,8 @@ public class StockServiceTests
         stockRepository.Setup(x => x.GetStock(StockType.Tomatoes))
             .ReturnsAsync(new StockDto(StockType.Tomatoes, 4));
 
-        var result = await stockService.HasInsufficientStock(order, recipes);
+        var stock = await stockService.GetStock(order, recipes);
+        var result = await stockService.HasInsufficientStock(order, recipes, stock);
 
         Assert.IsTrue(result);
 
@@ -196,7 +193,8 @@ public class StockServiceTests
         stockRepository.Setup(x => x.GetStock(StockType.UnicornDust))
         .ReturnsAsync(new StockDto(StockType.UnicornDust, 1));
 
-        var result = await stockService.HasInsufficientStock(order, recipes);
+        var stock = await stockService.GetStock(order, recipes);
+        var result = await stockService.HasInsufficientStock(order, recipes, stock);
 
         Assert.IsTrue(result);
 
@@ -224,7 +222,8 @@ public class StockServiceTests
         stockRepository.Setup(x => x.GetStock(StockType.Tomatoes))
         .ReturnsAsync(new StockDto(StockType.Tomatoes, 1));
 
-        var result = await stockService.HasInsufficientStock(order, recipes);
+        var stock = await stockService.GetStock(order, recipes);
+        var result = await stockService.HasInsufficientStock(order, recipes, stock);
 
         Assert.IsFalse(result);
 
@@ -252,7 +251,8 @@ public class StockServiceTests
         stockRepository.Setup(x => x.GetStock(StockType.Tomatoes))
         .ReturnsAsync(new StockDto(StockType.Tomatoes, 2));
 
-        var result = await stockService.HasInsufficientStock(order, recipes);
+        var stock = await stockService.GetStock(order, recipes);
+        var result = await stockService.HasInsufficientStock(order, recipes, stock);
 
         Assert.IsFalse(result);
 
@@ -289,7 +289,8 @@ public class StockServiceTests
         stockRepository.Setup(x => x.GetStock(StockType.Bacon))
         .ReturnsAsync(new StockDto(StockType.Bacon, 4));
 
-        var result = await stockService.HasInsufficientStock(order, recipes);
+        var stock = await stockService.GetStock(order, recipes);
+        var result = await stockService.HasInsufficientStock(order, recipes, stock);
 
         Assert.IsFalse(result);
 
@@ -324,7 +325,8 @@ public class StockServiceTests
         stockRepository.Setup(x => x.GetStock(StockType.Tomatoes))
             .ReturnsAsync(new StockDto(StockType.Tomatoes, 2));
 
-        var result = await stockService.HasInsufficientStock(order, recipes);
+        var stock = await stockService.GetStock(order, recipes);
+        var result = await stockService.HasInsufficientStock(order, recipes, stock);
 
         Assert.IsTrue(result);
 

@@ -9,12 +9,22 @@ public static class RecipeHelperExtensions
         this ModelStateDictionary modelState,
         IEnumerable<StockType> ingredientStockTypes)
     {
-        if (modelState.IsValid)
+        var stockTypes = ingredientStockTypes.ToList();
+        var badRequestMessage = new List<object>();
+
+        if (stockTypes.Count == 0)
         {
-            return null;
+            badRequestMessage.Add(new
+            {
+                message = "You must include at least 1 ingredient to create your pizza"
+            });
         }
 
-        var stockTypes = ingredientStockTypes.ToList();
+        if (modelState.IsValid)
+        {
+            return badRequestMessage.Count > 0 ? badRequestMessage : null;
+        }
+
         var errors = modelState
             .Where(entry => entry.Value?.Errors.Count > 0)
             .Select(entry => new
@@ -24,7 +34,6 @@ public static class RecipeHelperExtensions
                 ErrorMessage = entry.Value.Errors.Select(error => error.ErrorMessage).ToList()
             }).ToList();
 
-        var badRequestMessage = new List<object>();
         foreach (var error in errors)
         {
             var propertyName = error.Key[(error.Key.LastIndexOf('.') + 1)..];

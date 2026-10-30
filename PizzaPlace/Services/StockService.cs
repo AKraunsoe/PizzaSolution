@@ -7,7 +7,7 @@ namespace PizzaPlace.Services;
 
 public class StockService(IStockRepository stockRepository) : IStockService
 {
-    public async Task<bool> HasInsufficientStock(PizzaOrder order, ComparableList<PizzaRecipeDto> recipeDtos)
+    public async Task<bool> HasInsufficientStock(PizzaOrder order, ComparableList<PizzaRecipeDto> recipeDtos, ComparableList<StockDto> stock)
     {
         var prepareOrders = order.RequestedOrder
             .GroupBy(request => request.RecipeId)
@@ -19,7 +19,6 @@ public class StockService(IStockRepository stockRepository) : IStockService
             });
         var requiredStock = prepareOrders.GetRequiredStock();
 
-        var stock = await GetStock(order, recipeDtos);
         return !PizzaHelperExtensions.HasEnough(stock, requiredStock);
         /*var storage = new Dictionary<StockType, int>();
 
@@ -86,13 +85,22 @@ public class StockService(IStockRepository stockRepository) : IStockService
                 {
                     var stockType = recipe.Ingredients[j].StockType;
                     var stock = await stockRepository.GetStock(stockType);
-                    if(stock == null)
+                    if (stock == null)
                     {
                         throw new NullReferenceException("Stock cannot be null");
                     }
                     result.Add(stock);
                 }
             }
+        }
+        return result;
+    }
+
+    public async Task<ComparableList<StockDto>> TakeStock(ComparableList<StockDto> stock){
+        var result = new ComparableList<StockDto>();
+        foreach (var s in stock)
+        {
+            result.Add(await stockRepository.TakeStock(s.StockType, s.Amount));
         }
         return result;
     }

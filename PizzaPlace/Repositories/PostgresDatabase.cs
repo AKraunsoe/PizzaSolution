@@ -1,4 +1,5 @@
 using Npgsql;
+using PizzaPlace.Models.Types;
 
 namespace PizzaPlace.Repositories;
 
@@ -32,5 +33,18 @@ public sealed class PostgresDatabase(NpgsqlDataSource dataSource)
             connection);
 
         await command.ExecuteNonQueryAsync(cancellationToken);
+
+        foreach (var stockType in Enum.GetValues<StockType>())
+        {
+            await using var stockCommand = new NpgsqlCommand(
+                """
+                INSERT INTO stock (stock_type, amount)
+                VALUES (@stockType, 0)
+                ON CONFLICT (stock_type) DO NOTHING;
+                """,
+                connection);
+            stockCommand.Parameters.AddWithValue("stockType", stockType.ToString());
+            await stockCommand.ExecuteNonQueryAsync(cancellationToken);
+        }
     }
 }

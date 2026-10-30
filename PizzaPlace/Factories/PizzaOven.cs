@@ -1,5 +1,4 @@
-﻿using PizzaPlace.Extensions;
-using PizzaPlace.Models;
+﻿using PizzaPlace.Models;
 using PizzaPlace.Models.Types;
 using PizzaPlace.Pizzas;
 
@@ -12,10 +11,8 @@ public abstract class PizzaOven(TimeProvider timeProvider) : IPizzaOven
     private readonly Dictionary<Guid, Task<(Pizza?, Guid)>> _pizzasInOven = [];
     private readonly object _ovenLock = new();
 
-    public async Task<IEnumerable<Pizza>> PreparePizzas(ComparableList<PizzaPrepareOrder> order, ComparableList<StockDto> stock)
+    public async Task<IEnumerable<Pizza>> PreparePizzas(ComparableList<PizzaPrepareOrder> order)
     {
-        if (!stock.HasEnough(order.GetRequiredStock()))
-            throw new PizzaException("Not enough ingredients to create all pizzas.");
 
         List<(PizzaRecipeDto Recipe, Guid OrderGuid)> recipeOrders = order
             .SelectMany(order => Enumerable.Range(0, order.OrderAmount).Select(_ => (order.RecipeDto, Guid.NewGuid())))
@@ -100,8 +97,8 @@ public abstract class PizzaOven(TimeProvider timeProvider) : IPizzaOven
             }
         }
 
-
     }
+
     protected static async Task<(Pizza?, Guid)> Wrap(Task<Pizza?> pizzaTask, Guid orderGuid) =>
         (await pizzaTask, orderGuid);
 }

@@ -31,7 +31,9 @@ public class RecipeControllerTests
         controller.ModelState.AddModelError("recipeType", "Invalid recipe type.");
         var request = new CreatePizzaRecipeRequest(
             default,
-            new ComparableList<CreateRecipeIngredientRequest>(),
+            new ComparableList<CreateRecipeIngredientRequest>(){
+                new(default, 1)
+            },
             1);
 
         // Act
@@ -213,10 +215,13 @@ public class RecipeControllerTests
     public async Task UpdateRecipe_IdMustBeGreaterThanZero()
     {
         // Arrange
-        var recipe = new PizzaRecipeDto(
+        var recipe = new UpdatePizzaRequest(
             PizzaRecipeType.StandardPizza,
-            [],
-            5);
+            new ComparableList<IngredientRequest>(){
+                new(default, 1)
+            },
+            5,
+            0);
 
         // Act
         var result = await controller.UpdatePizzaRecipe(recipe);
@@ -241,9 +246,11 @@ public class RecipeControllerTests
                 new Microsoft.Extensions.Primitives.StringValues(invalidRecipeType),
                 System.Globalization.CultureInfo.InvariantCulture));
         controller.ModelState.AddModelError("RecipeType", "Invalid recipe type.");
-        var recipe = new PizzaRecipeDto(
+        var recipe = new UpdatePizzaRequest(
             default,
-            [],
+            new ComparableList<IngredientRequest>(){
+                new(default, 1)
+            },
             5,
             42);
 
@@ -270,9 +277,9 @@ public class RecipeControllerTests
                 new Microsoft.Extensions.Primitives.StringValues(invalidStockType),
                 System.Globalization.CultureInfo.InvariantCulture));
         controller.ModelState.AddModelError("Ingredients[0].StockType", "Invalid stock type.");
-        var recipe = new PizzaRecipeDto(
+        var recipe = new UpdatePizzaRequest(
             PizzaRecipeType.StandardPizza,
-            [new StockDto(default, 1)],
+            [new IngredientRequest(default, 1)],
             5,
             42);
 
@@ -297,22 +304,121 @@ public class RecipeControllerTests
     public async Task UpdateRecipe_Success()
     {
         // Arrange
-        var recipe = new PizzaRecipeDto(
+        var request = new UpdatePizzaRequest(
             PizzaRecipeType.StandardPizza,
-            [new StockDto(StockType.Dough, 2)],
+            [new IngredientRequest(StockType.Dough, 2)],
             5,
             42);
+        var recipe = new PizzaRecipeDto(
+            request.RecipeType,
+            [new StockDto(StockType.Dough, 2)],
+            request.CookingTimeMinutes,
+            request.Id);
         recipeService.Setup(service => service.UpdateRecipe(recipe))
             .ReturnsAsync(recipe);
 
         // Act
-        var result = await controller.UpdatePizzaRecipe(recipe);
+        var result = await controller.UpdatePizzaRecipe(request);
 
         // Assert
         Assert.IsInstanceOfType(result, typeof(OkObjectResult));
         var response = ((OkObjectResult)result).Value!;
         var actualRecipe = response.GetType().GetProperty("recipe")!.GetValue(response);
         Assert.AreEqual(recipe, actualRecipe);
+        recipeService.VerifyAll();
+    }
+
+    [TestMethod]
+    public async Task GetRecipe_NotFound_ThrowsError()
+    {
+        const long recipeId = 999;
+        var exception = new PizzaException($"Recipe does not exist with id {recipeId}.");
+        recipeService.Setup(service => service.GetRecipe(recipeId))
+            .ThrowsAsync(exception);
+
+        var actual = await Assert.ThrowsExceptionAsync<PizzaException>(
+            () => controller.GetRecipe(recipeId));
+
+        Assert.AreSame(exception, actual);
+        recipeService.VerifyAll();
+    }
+
+    [DataTestMethod]
+    [DataRow(0)]
+    [DataRow(-1)]
+    public async Task GetRecipe_IdMustBePositive_ReturnsBadRequest(long recipeId)
+    {
+        var result = await controller.GetRecipe(recipeId);
+
+        Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
+        var response = ((BadRequestObjectResult)result).Value!;
+        var message = response.GetType().GetProperty("message")!.GetValue(response);
+        Assert.AreEqual("ID has to be a positive integer", message);
+        recipeService.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public async Task GetRecipe_Found_ReturnsRecipe()
+    {
+        const long recipeId = 42;
+        var expectedRecipe = new PizzaRecipeDto(
+            PizzaRecipeType.StandardPizza,
+            [new StockDto(StockType.Dough, 2)],
+            5,
+            recipeId);
+        recipeService.Setup(service => service.GetRecipe(recipeId))
+            .ReturnsAsync(expectedRecipe);
+
+        var result = await controller.GetRecipe(recipeId);
+
+        Assert.IsInstanceOfType(result, typeof(OkObjectResult));
+        var response = ((OkObjectResult)result).Value!;
+        var actualRecipe = response.GetType().GetProperty("recipe")!.GetValue(response);
+        Assert.AreEqual(expectedRecipe, actualRecipe);
+        recipeService.VerifyAll();
+    }
+
+    [TestMethod]
+    public async Task GetRecipes_ReturnsRecipeList()
+    {
+        ComparableList<PizzaRecipeDto> expectedRecipes =
+        [
+            new PizzaRecipeDto(
+                PizzaRecipeType.StandardPizza,
+                [new StockDto(StockType.Dough, 2)],
+                5,
+                42),
+            new PizzaRecipeDto(
+                PizzaRecipeType.EmptyPizza,
+                [new StockDto(StockType.Tomatoes, 3)],
+                8,
+                43)
+        ];
+        recipeService.Setup(service => service.GetRecipes())
+            .ReturnsAsync(expectedRecipes);
+
+        var result = await controller.GetRecipes();
+
+        Assert.IsInstanceOfType(result, typeof(OkObjectResult));
+        var response = ((OkObjectResult)result).Value!;
+        var actualRecipes = response.GetType().GetProperty("recipes")!.GetValue(response);
+        Assert.AreEqual(expectedRecipes, actualRecipes);
+        recipeService.VerifyAll();
+    }
+
+    [TestMethod]
+    public async Task GetRecipes_ReturnsEmptyListWhenNoRecipesFound()
+    {
+        ComparableList<PizzaRecipeDto> expectedRecipes = [];
+        recipeService.Setup(service => service.GetRecipes())
+            .ReturnsAsync(expectedRecipes);
+
+        var result = await controller.GetRecipes();
+
+        Assert.IsInstanceOfType(result, typeof(OkObjectResult));
+        var response = ((OkObjectResult)result).Value!;
+        var actualRecipes = response.GetType().GetProperty("recipes")!.GetValue(response);
+        Assert.AreEqual(expectedRecipes, actualRecipes);
         recipeService.VerifyAll();
     }
 }

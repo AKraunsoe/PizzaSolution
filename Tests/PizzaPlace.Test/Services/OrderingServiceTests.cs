@@ -35,17 +35,22 @@ public class OrderingServiceTests
                 new StockDto(StockType.BellPeppers, 2),
             ], 15, 2);
         ComparableList<PizzaRecipeDto> recipes = [standardRecipe, tastyRecipe];
-        ComparableList<StockDto> returnedStock = [new StockDto(StockType.Anchovies, 2)]; // Doesn't matter that it doesn't match recipes.
         ComparableList<PizzaPrepareOrder> prepareOrders =
         [
             new PizzaPrepareOrder(standardRecipe, 58),
             new PizzaPrepareOrder(tastyRecipe, 2),
         ];
-
         var pizzas = new List<Pizza>{
             new StandardPizza(),
             new ExtremelyTastyPizza(),
         };
+        ComparableList<StockDto> stock =
+        [
+            new StockDto(StockType.Dough, 100),
+            new StockDto(StockType.Tomatoes, 100),
+            new StockDto(StockType.UnicornDust, 100),
+            new StockDto(StockType.BellPeppers, 100),
+        ];
 
         var stockService = new Mock<IStockService>(MockBehavior.Strict);
         var recipeService = new Mock<IRecipeService>(MockBehavior.Strict);
@@ -53,11 +58,13 @@ public class OrderingServiceTests
 
         recipeService.Setup(x => x.GetPizzaRecipes(order))
             .ReturnsAsync(recipes);
-        stockService.Setup(x => x.HasInsufficientStock(order, recipes))
-            .ReturnsAsync(false);
         stockService.Setup(x => x.GetStock(order, recipes))
-            .ReturnsAsync(returnedStock);
-        pizzaOven.Setup(x => x.PreparePizzas(prepareOrders, returnedStock))
+            .ReturnsAsync(stock);
+        stockService.Setup(x => x.HasInsufficientStock(order, recipes, stock))
+            .ReturnsAsync(false);
+        stockService.Setup(x => x.TakeStock(stock))
+            .ReturnsAsync(stock);
+        pizzaOven.Setup(x => x.PreparePizzas(prepareOrders))
             .ReturnsAsync(pizzas);
 
         var service = GetService(stockService.Object, recipeService.Object, pizzaOven.Object);
@@ -94,7 +101,10 @@ public class OrderingServiceTests
 
         recipeService.Setup(x => x.GetPizzaRecipes(order))
             .ReturnsAsync(recipes);
-        stockService.Setup(x => x.HasInsufficientStock(order, recipes))
+        ComparableList<StockDto> stock = [];
+        stockService.Setup(x => x.GetStock(order, recipes))
+            .ReturnsAsync(stock);
+        stockService.Setup(x => x.HasInsufficientStock(order, recipes, stock))
             .ReturnsAsync(true);
 
         var service = GetService(stockService.Object, recipeService.Object, pizzaOven.Object);
@@ -106,7 +116,7 @@ public class OrderingServiceTests
         Assert.AreEqual("Unable to take in order. Insufficient stock.", ex.Message);
         stockService.VerifyAll();
         recipeService.VerifyAll();
-        pizzaOven.VerifyAll();
+        pizzaOven.VerifyNoOtherCalls();
     }
 
     [TestMethod]
@@ -119,7 +129,6 @@ public class OrderingServiceTests
         ];
         var order = new PizzaOrder(requests);
         ComparableList<PizzaRecipeDto> recipes = [];
-        ComparableList<StockDto> returnedStock = [new StockDto(StockType.Anchovies, 2)]; // Doesn't matter that it doesn't match recipes.
 
         var stockService = new Mock<IStockService>(MockBehavior.Strict);
         var recipeService = new Mock<IRecipeService>(MockBehavior.Strict);
@@ -127,10 +136,11 @@ public class OrderingServiceTests
 
         recipeService.Setup(x => x.GetPizzaRecipes(order))
             .ReturnsAsync(recipes);
-        stockService.Setup(x => x.HasInsufficientStock(order, recipes))
-            .ReturnsAsync(false);
+        ComparableList<StockDto> stock = [];
         stockService.Setup(x => x.GetStock(order, recipes))
-            .ReturnsAsync(returnedStock);
+            .ReturnsAsync(stock);
+        stockService.Setup(x => x.HasInsufficientStock(order, recipes, stock))
+            .ReturnsAsync(false);
 
         var service = GetService(stockService.Object, recipeService.Object, pizzaOven.Object);
 

@@ -28,7 +28,6 @@ public class RecipeRepository(NpgsqlDataSource dataSource) : IRecipeRepository
                 INSERT INTO ingredients (stock_type, amount, recipe_id)
                 VALUES (@stockType, @amount, @id)
                 RETURNING id;
-
                 """, connection);
             insertIngredient.Parameters.AddWithValue("stockType", ingredient.StockType.ToString());
             insertIngredient.Parameters.AddWithValue("amount", ingredient.Amount);
@@ -48,30 +47,73 @@ public class RecipeRepository(NpgsqlDataSource dataSource) : IRecipeRepository
     public async Task<PizzaRecipeDto> GetRecipe(long id)
     {
         await using var connection = await dataSource.OpenConnectionAsync();
-        await using var command = new NpgsqlCommand(
-            "SELECT id, recipe_type, ingredients, cooking_time_minutes FROM recipes WHERE id = @id;",
+        await using var recipeCommand = new NpgsqlCommand(
+            """
+            SELECT id, recipe_type, cooking_time_minutes
+            FROM recipes r
+            WHERE r.id = @id;
+            """,
             connection);
-        command.Parameters.AddWithValue("id", id);
+        recipeCommand.Parameters.AddWithValue("id", id);
 
-        await using var reader = await command.ExecuteReaderAsync();
-        if (!await reader.ReadAsync())
+        await using var recipeReader = await recipeCommand.ExecuteReaderAsync();
+        if (!await recipeReader.ReadAsync())
             throw new PizzaException($"Recipe does not exist with id {id}.");
 
-        var recipeType = Enum.Parse<PizzaRecipeType>(reader.GetString(1));
-        var ingredients = JsonSerializer.Deserialize<List<StockDto>>(reader.GetString(2))
-            ?? throw new InvalidOperationException($"Stored ingredients are invalid for recipe id {id}.");
+        var recipeType = Enum.Parse<PizzaRecipeType>(recipeReader.GetString(1));
+        var cookingTime = recipeReader.GetInt32(2);
+        recipeReader.Close();
+
+        await using var ingredientsCommand = new NpgsqlCommand(
+            """
+            SELECT stock_type, amount
+            FROM ingredients
+            WHERE recipe_id = @id;
+            """, connection);
+        ingredientsCommand.Parameters.AddWithValue("id", id);
+
+        var ingredients = new ComparableList<StockDto>();
+        await using var ingredientReader = await ingredientsCommand.ExecuteReaderAsync();
+        while (await ingredientReader.ReadAsync())
+        {
+            ingredients.Add(new StockDto(
+                        Enum.Parse<StockType>(ingredientReader.GetString(0)),
+                        ingredientReader.GetInt32(1)));
+        }
+
+        if(ingredients.Count == 0){
+            throw new PizzaException($"Recipe with id {id} does not have any ingredients");
+        }
+
         return new PizzaRecipeDto(
             recipeType,
-            new ComparableList<StockDto>(ingredients),
-            reader.GetInt32(3),
-            reader.GetInt64(0));
+            ingredients,
+            cookingTime,
+            id);
     }
 
     public async Task<ComparableList<PizzaRecipeDto>> GetRecipes()
     {
         await using var connection = await dataSource.OpenConnectionAsync();
         await using var command = new NpgsqlCommand(
-            "SELECT id, recipe_type, ingredients, cooking_time_minutes FROM recipes ORDER BY id;",
+            """
+            SELECT
+                r.id,
+                r.recipe_type,
+                r.cooking_time_minutes,
+                COALESCE(
+                    jsonb_agg(jsonb_build_object(
+                        'StockType', i.stock_type,
+                        'Amount', i.amount,
+                        'Id', i.id
+                    )) FILTER (WHERE i.id IS NOT NULL),
+                    '[]'::jsonb
+                ) AS ingredients
+            FROM recipes AS r
+            LEFT JOIN ingredients AS i ON i.recipe_id = r.id
+            GROUP BY r.id, r.recipe_type, r.cooking_time_minutes
+            ORDER BY r.id;
+            """,
             connection);
         await using var reader = await command.ExecuteReaderAsync();
 
@@ -80,12 +122,12 @@ public class RecipeRepository(NpgsqlDataSource dataSource) : IRecipeRepository
         {
             var id = reader.GetInt64(0);
             var recipeType = Enum.Parse<PizzaRecipeType>(reader.GetString(1));
-            var ingredients = JsonSerializer.Deserialize<List<StockDto>>(reader.GetString(2))
+            var ingredients = JsonSerializer.Deserialize<List<StockDto>>(reader.GetString(3))
                 ?? throw new InvalidOperationException($"Stored ingredients are invalid for recipe id {id}.");
             recipes.Add(new PizzaRecipeDto(
                 recipeType,
                 new ComparableList<StockDto>(ingredients),
-                reader.GetInt32(3),
+                reader.GetInt32(2),
                 id));
         }
 
@@ -99,7 +141,6 @@ public class RecipeRepository(NpgsqlDataSource dataSource) : IRecipeRepository
             """
             UPDATE recipes
             SET recipe_type = @recipeType,
-                ingredients = @ingredients,
                 cooking_time_minutes = @cookingTimeMinutes
             WHERE id = @id
             RETURNING id;
@@ -107,10 +148,38 @@ public class RecipeRepository(NpgsqlDataSource dataSource) : IRecipeRepository
             connection);
         command.Parameters.AddWithValue("id", recipe.Id);
         command.Parameters.AddWithValue("recipeType", recipe.RecipeType.ToString());
-        command.Parameters.Add("ingredients", NpgsqlDbType.Jsonb).Value = JsonSerializer.Serialize(recipe.Ingredients.ToList());
         command.Parameters.AddWithValue("cookingTimeMinutes", recipe.CookingTimeMinutes);
 
         var id = await command.ExecuteScalarAsync();
+
+        await using var removeIngredients = new NpgsqlCommand(
+            """
+            DELETE FROM ingredients
+            WHERE recipe_id = @id;
+            """,
+            connection);
+
+        removeIngredients.Parameters.AddWithValue("id", recipe.Id);
+
+        await removeIngredients.ExecuteScalarAsync();
+
+        foreach(var ingredient in recipe.Ingredients){
+            await using var insertIngredient = new NpgsqlCommand(
+                """
+                INSERT INTO ingredients (stock_type, amount, recipe_id)
+                VALUES (@stockType, @amount, @id)
+                RETURNING id;
+                """, connection);
+            insertIngredient.Parameters.AddWithValue("stockType", ingredient.StockType.ToString());
+            insertIngredient.Parameters.AddWithValue("amount", ingredient.Amount);
+            insertIngredient.Parameters.AddWithValue("id", recipe.Id);
+
+            var ingredientId = await insertIngredient.ExecuteScalarAsync();
+            if (!(ingredientId is long stockId)){
+                throw new InvalidOperationException("The database did not return the new ingredient ID.");
+            }
+        }
+
         return id is long recipeId
             ? recipeId
             : throw new PizzaException($"Recipe does not exist with id {recipe.Id}.");

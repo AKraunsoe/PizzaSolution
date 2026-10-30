@@ -8,8 +8,14 @@ namespace PizzaPlace.Controllers;
 public class RestockingController(IStockRepository stockRepository) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> Restock([FromBody] ComparableList<StockDto> stock)
+    public async Task<IActionResult> Restock([FromBody] ComparableList<IngredientRequest> stock)
     {
-        throw new NotImplementedException("Restocking has not been implemented.");
+        var result = new ComparableList<StockDto>();
+        foreach (var s in stock)
+        {
+            result.Add(await stockRepository.AddToStock(new StockDto(s.StockType, s.Amount)));
+        }
+
+        return Ok(result);
     }
 }
