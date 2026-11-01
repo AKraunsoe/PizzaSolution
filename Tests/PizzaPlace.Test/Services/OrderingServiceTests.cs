@@ -130,7 +130,7 @@ public class OrderingServiceTests
         var order = new PizzaOrder(requests);
         ComparableList<PizzaRecipeDto> recipes = [];
 
-        var stockService = new Mock<IStockService>(MockBehavior.Strict);
+        var stockService = new Mock<IStockService>();
         var recipeService = new Mock<IRecipeService>(MockBehavior.Strict);
         var pizzaOven = new Mock<IPizzaOven>(MockBehavior.Strict);
 
