@@ -24,7 +24,7 @@ public class StockServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 1)
+            new PizzaAmount(1, 1)
         ];
         var order = new PizzaOrder(requests);
         var recipe = new PizzaRecipeDto(PizzaRecipeType.ExtremelyTastyPizza,
@@ -49,7 +49,7 @@ public class StockServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.ExtremelyTastyPizza, 1, 1)
+            new PizzaAmount(1, 1)
         ];
         var order = new PizzaOrder(requests);
         var recipe = new PizzaRecipeDto(PizzaRecipeType.ExtremelyTastyPizza,
@@ -69,7 +69,7 @@ public class StockServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 1)
+            new PizzaAmount(1, 1)
         ];
         var order = new PizzaOrder(requests);
         var recipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza,
@@ -98,7 +98,7 @@ public class StockServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 1)
+            new PizzaAmount(1, 1)
         ];
         var order = new PizzaOrder(requests);
         var recipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza,
@@ -128,7 +128,7 @@ public class StockServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 1)
+            new PizzaAmount(1, 1)
         ];
         var order = new PizzaOrder(requests);
         var recipe = new PizzaRecipeDto(PizzaRecipeType.ExtremelyTastyPizza,
@@ -149,7 +149,7 @@ public class StockServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 1)
+            new PizzaAmount(1, 1)
         ];
         var order = new PizzaOrder(requests);
         var recipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza,
@@ -164,8 +164,8 @@ public class StockServiceTests
         stockRepository.Setup(x => x.GetStock(StockType.Tomatoes))
             .ReturnsAsync(new StockDto(StockType.Tomatoes, 4));
 
-        var stock = await stockService.GetStock(order, recipes);
-        var result = await stockService.HasInsufficientStock(order, recipes, stock);
+        var requiredStock = stockService.GetRequiredStock(order, recipes);
+        var result = await stockService.HasInsufficientStock(order, recipes, requiredStock);
 
         Assert.IsTrue(result);
 
@@ -177,7 +177,7 @@ public class StockServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 2)
+            new PizzaAmount(1, 2)
         ];
         var order = new PizzaOrder(requests);
         var recipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza,
@@ -193,8 +193,8 @@ public class StockServiceTests
         stockRepository.Setup(x => x.GetStock(StockType.UnicornDust))
         .ReturnsAsync(new StockDto(StockType.UnicornDust, 1));
 
-        var stock = await stockService.GetStock(order, recipes);
-        var result = await stockService.HasInsufficientStock(order, recipes, stock);
+        var requiredStock = stockService.GetRequiredStock(order, recipes);
+        var result = await stockService.HasInsufficientStock(order, recipes, requiredStock);
 
         Assert.IsTrue(result);
 
@@ -206,7 +206,7 @@ public class StockServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 1)
+            new PizzaAmount(1, 1)
         ];
         var order = new PizzaOrder(requests);
         var recipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza,
@@ -222,8 +222,8 @@ public class StockServiceTests
         stockRepository.Setup(x => x.GetStock(StockType.Tomatoes))
         .ReturnsAsync(new StockDto(StockType.Tomatoes, 1));
 
-        var stock = await stockService.GetStock(order, recipes);
-        var result = await stockService.HasInsufficientStock(order, recipes, stock);
+        var requiredStock = stockService.GetRequiredStock(order, recipes);
+        var result = await stockService.HasInsufficientStock(order, recipes, requiredStock);
 
         Assert.IsFalse(result);
 
@@ -235,7 +235,7 @@ public class StockServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 2)
+            new PizzaAmount(1, 2)
         ];
         var order = new PizzaOrder(requests);
         var recipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza,
@@ -251,8 +251,8 @@ public class StockServiceTests
         stockRepository.Setup(x => x.GetStock(StockType.Tomatoes))
         .ReturnsAsync(new StockDto(StockType.Tomatoes, 2));
 
-        var stock = await stockService.GetStock(order, recipes);
-        var result = await stockService.HasInsufficientStock(order, recipes, stock);
+        var requiredStock = stockService.GetRequiredStock(order, recipes);
+        var result = await stockService.HasInsufficientStock(order, recipes, requiredStock);
 
         Assert.IsFalse(result);
 
@@ -264,8 +264,8 @@ public class StockServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 2),
-            new PizzaAmount(PizzaRecipeType.ExtremelyTastyPizza, 2, 1)
+            new PizzaAmount(1, 2),
+            new PizzaAmount(2, 1)
         ];
         var order = new PizzaOrder(requests);
         var standardRecipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza,
@@ -289,8 +289,8 @@ public class StockServiceTests
         stockRepository.Setup(x => x.GetStock(StockType.Bacon))
         .ReturnsAsync(new StockDto(StockType.Bacon, 4));
 
-        var stock = await stockService.GetStock(order, recipes);
-        var result = await stockService.HasInsufficientStock(order, recipes, stock);
+        var requiredStock = stockService.GetRequiredStock(order, recipes);
+        var result = await stockService.HasInsufficientStock(order, recipes, requiredStock);
 
         Assert.IsFalse(result);
 
@@ -302,8 +302,8 @@ public class StockServiceTests
         // Arrange
         ComparableList<PizzaAmount> requests =
         [
-            new PizzaAmount(PizzaRecipeType.StandardPizza, 1, 2),
-            new PizzaAmount(PizzaRecipeType.ExtremelyTastyPizza, 2, 1)
+            new PizzaAmount(1, 2),
+            new PizzaAmount(2, 1)
         ];
         var order = new PizzaOrder(requests);
         var standardRecipe = new PizzaRecipeDto(PizzaRecipeType.StandardPizza,
@@ -325,8 +325,8 @@ public class StockServiceTests
         stockRepository.Setup(x => x.GetStock(StockType.Tomatoes))
             .ReturnsAsync(new StockDto(StockType.Tomatoes, 2));
 
-        var stock = await stockService.GetStock(order, recipes);
-        var result = await stockService.HasInsufficientStock(order, recipes, stock);
+        var requiredStock = stockService.GetRequiredStock(order, recipes);
+        var result = await stockService.HasInsufficientStock(order, recipes, requiredStock);
 
         Assert.IsTrue(result);
 

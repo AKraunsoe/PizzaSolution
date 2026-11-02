@@ -9,4 +9,6 @@ public interface IStockService
     Task<ComparableList<StockDto>> GetStock(PizzaOrder order, ComparableList<PizzaRecipeDto> recipeDtos);
 
     Task<ComparableList<StockDto>> TakeStock(ComparableList<StockDto> stock);
+
+    ComparableList<StockDto> GetRequiredStock(PizzaOrder order, ComparableList<PizzaRecipeDto> recipeDtos);
 }

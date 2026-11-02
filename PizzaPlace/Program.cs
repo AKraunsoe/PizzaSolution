@@ -42,6 +42,7 @@ services.AddSingleton(NpgsqlDataSource.Create(connectionString));
 services.AddSingleton<PostgresDatabase>();
 services.AddTransient<IStockRepository, StockRepository>();
 services.AddTransient<IRecipeRepository, RecipeRepository>();
+services.AddTransient<IOrderRepository, OrderRepository>();
 
 services.AddTransient<IPizzaOven, NormalPizzaOven>();
 services.AddTransient<IPizzaOven, AssemblyLinePizzaOven>();
@@ -51,6 +52,9 @@ services.AddTransient<IStockService, StockService>();
 services.AddTransient<IRecipeService, RecipeService>();
 services.AddTransient<IOrderingService, OrderingService>();
 services.AddTransient<IMenuService, MenuService>();
+
+builder.Services.AddHostedService<ClearOrders>();
+
 
 var app = builder.Build();
 

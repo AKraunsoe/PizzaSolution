@@ -7,7 +7,8 @@ namespace PizzaPlace.Services;
 
 public class StockService(IStockRepository stockRepository) : IStockService
 {
-    public async Task<bool> HasInsufficientStock(PizzaOrder order, ComparableList<PizzaRecipeDto> recipeDtos, ComparableList<StockDto> stock)
+
+    public ComparableList<StockDto> GetRequiredStock(PizzaOrder order, ComparableList<PizzaRecipeDto> recipeDtos)
     {
         var prepareOrders = order.RequestedOrder
             .GroupBy(request => request.RecipeId)
@@ -17,7 +18,14 @@ public class StockService(IStockRepository stockRepository) : IStockService
                     ?? throw new NullReferenceException($"Cannot check stock for missing recipe id {requests.Key}.");
                 return new PizzaPrepareOrder(recipe, requests.Sum(request => (int)request.Amount));
             });
-        var requiredStock = prepareOrders.GetRequiredStock();
+
+        return new ComparableList<StockDto>(prepareOrders.GetRequiredStock());
+    }
+
+    public async Task<bool> HasInsufficientStock(PizzaOrder order, ComparableList<PizzaRecipeDto> recipeDtos, ComparableList<StockDto> requiredStock)
+    {
+
+        var stock = await GetStock(order, recipeDtos);
 
         return !PizzaHelperExtensions.HasEnough(stock, requiredStock);
         /*var storage = new Dictionary<StockType, int>();

@@ -1,5 +1,11 @@
-﻿using PizzaPlace.Models.Types;
+﻿namespace PizzaPlace;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
-namespace PizzaPlace;
-
-public record PizzaAmount(PizzaRecipeType PizzaType, long RecipeId, ushort Amount);
+public record PizzaAmount(
+    [property: DefaultValue(1)]
+    [Range(1, int.MaxValue)]
+    long RecipeId,
+    [property: DefaultValue(1)]
+    [Range(1, int.MaxValue)]
+    ushort Amount);

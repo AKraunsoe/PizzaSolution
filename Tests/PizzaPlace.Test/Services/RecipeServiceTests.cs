@@ -16,9 +16,9 @@ public class RecipeServiceTests
     {
         // Arrange
         var order = new PizzaOrder([
-            new PizzaAmount(PizzaRecipeType.RarePizza, 11, 1),
-            new PizzaAmount(PizzaRecipeType.OddPizza, 12, 2),
-            new PizzaAmount(PizzaRecipeType.RarePizza, 11, 20),
+            new PizzaAmount(11, 1),
+            new PizzaAmount(12, 2),
+            new PizzaAmount(11, 20),
         ]);
         var rareRecipe = new PizzaRecipeDto(PizzaRecipeType.RarePizza, [new StockDto(StockType.UnicornDust, 1)], 1, 11);
         var oddRecipe = new PizzaRecipeDto(PizzaRecipeType.OddPizza, [new StockDto(StockType.Sulphur, 10)], 100, 12);
