@@ -14,7 +14,7 @@ public class OrderingController(
     {
         var stockTuple = await orderingService.PizzaCreationPossible(pizzaOrder);
         var orderId = await orderingService.CreatePizzaOrder(pizzaOrder);
-        orderingService.HandlePizzaOrder(pizzaOrder, orderId, requiredStock, recipes);
+        orderingService.HandlePizzaOrder(pizzaOrder, orderId, stockTuple.Item2, stockTuple.Item1);
         return Ok(new
         {
             status = "Accepted",

@@ -119,6 +119,7 @@ public class OrderRepositoryTests
         var expectedOrder = new CustomerOrder(
             orderId,
             [new PizzaAmount(1, 2)],
+            "sometime",
             "cooking",
             15m);
         var repository = GetOrderRepository();

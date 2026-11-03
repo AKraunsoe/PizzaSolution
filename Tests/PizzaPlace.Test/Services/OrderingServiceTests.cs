@@ -214,6 +214,7 @@ public class OrderingServiceTests
         var expectedOrder = new CustomerOrder(
             orderId,
             [new PizzaAmount(4, 2)],
+            "sometime",
             "cooking",
             25m);
         var orderRepository = new Mock<IOrderRepository>(MockBehavior.Strict);

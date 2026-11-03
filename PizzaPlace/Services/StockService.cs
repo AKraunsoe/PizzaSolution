@@ -27,7 +27,7 @@ public class StockService(IStockRepository stockRepository) : IStockService
 
         var stock = await GetStock(order, recipeDtos);
 
-        return PizzaHelperExtensions.HasEnough(stock, requiredStock);
+        return !PizzaHelperExtensions.HasEnough(stock, requiredStock);
         /*var storage = new Dictionary<StockType, int>();
 
         for (int i = 0; i < order.RequestedOrder.Count; i++)

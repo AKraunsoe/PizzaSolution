@@ -83,6 +83,7 @@ public class OrderingControllerTests
         var expectedOrder = new CustomerOrder(
             orderId,
             [new PizzaAmount(3, 2)],
+            "sometime",
             "cooking",
             25m);
         var orderingService = new Mock<IOrderingService>(MockBehavior.Strict);
