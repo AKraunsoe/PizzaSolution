@@ -15,7 +15,7 @@ public class StockRepositoryTests
         // Arrange
         var addedAmount = 10;
         var stock = new StockDto(StockType.TrippleBacon, addedAmount);
-        var repository = GetStockRepository();
+        var repository = GetStockRepository();        
 
         // Act
         var actual = await repository.AddToStock(stock);

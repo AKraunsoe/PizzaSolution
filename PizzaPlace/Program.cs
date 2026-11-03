@@ -53,7 +53,7 @@ services.AddTransient<IRecipeService, RecipeService>();
 services.AddTransient<IOrderingService, OrderingService>();
 services.AddTransient<IMenuService, MenuService>();
 
-builder.Services.AddHostedService<ClearOrders>();
+//builder.Services.AddHostedService<ClearOrders>();
 
 
 var app = builder.Build();

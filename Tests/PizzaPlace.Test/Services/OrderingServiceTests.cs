@@ -48,7 +48,8 @@ public class OrderingServiceTests
             new PizzaPrepareOrder(standardRecipe, 58),
             new PizzaPrepareOrder(tastyRecipe, 2),
         ];
-        var pizzas = new List<Pizza>{
+        var pizzas = new List<Pizza>
+        {
             new StandardPizza(),
             new ExtremelyTastyPizza(),
         };
@@ -65,12 +66,6 @@ public class OrderingServiceTests
         var pizzaOven = new Mock<IPizzaOven>(MockBehavior.Strict);
         var orderRepository = new Mock<IOrderRepository>();
 
-        recipeService.Setup(x => x.GetPizzaRecipes(order))
-            .ReturnsAsync(recipes);
-        stockService.Setup(x => x.GetRequiredStock(order, recipes))
-            .Returns(stock);
-        stockService.Setup(x => x.HasInsufficientStock(order, recipes, stock))
-            .ReturnsAsync(false);
         stockService.Setup(x => x.TakeStock(stock))
             .ReturnsAsync(stock);
         pizzaOven.Setup(x => x.PreparePizzas(prepareOrders))
@@ -79,12 +74,11 @@ public class OrderingServiceTests
         var service = GetService(stockService.Object, recipeService.Object, pizzaOven.Object, orderRepository.Object);
 
         // Act
-        var actual = await service.HandlePizzaOrder(order, 1);
+        var actual = await service.HandlePizzaOrder(order, 1, stock, recipes);
 
         // Assert
         CollectionAssert.AreEqual(pizzas, actual.ToList());
         stockService.VerifyAll();
-        recipeService.VerifyAll();
         pizzaOven.VerifyAll();
     }
 
@@ -92,40 +86,33 @@ public class OrderingServiceTests
     public async Task HandlePizzaOrder_InsufficientStock()
     {
         // Arrange
-        ComparableList<PizzaAmount> requests =
-        [
-            new PizzaAmount(2, 2),
-        ];
-        var order = new PizzaOrder(requests);
-        var tastyRecipe = new PizzaRecipeDto(PizzaRecipeType.ExtremelyTastyPizza,
-            [
-                new StockDto(StockType.UnicornDust, 1),
-                new StockDto(StockType.BellPeppers, 2),
-            ], 15, 2);
-        ComparableList<PizzaRecipeDto> recipes = [tastyRecipe];
+        var order = new PizzaOrder([new PizzaAmount(2, 2)]);
+        ComparableList<StockDto> requiredStock = [new StockDto(StockType.UnicornDust, 4)];
+        var recipe = new PizzaRecipeDto(
+            PizzaRecipeType.ExtremelyTastyPizza,
+            [new StockDto(StockType.UnicornDust, 1)],
+            15,
+            2);
+        ComparableList<PizzaRecipeDto> recipes = [recipe];
+        var expectedException = new PizzaException("Not enough stock to take the given amount.");
 
-        var stockService = new Mock<IStockService>();
-        var recipeService = new Mock<IRecipeService>(MockBehavior.Strict);
+        var stockService = new Mock<IStockService>(MockBehavior.Strict);
+        var recipeService = new Mock<IRecipeService>();
         var pizzaOven = new Mock<IPizzaOven>(MockBehavior.Strict);
         var orderRepository = new Mock<IOrderRepository>();
 
-        recipeService.Setup(x => x.GetPizzaRecipes(order))
-            .ReturnsAsync(recipes);
-        ComparableList<StockDto> stock = [];
-        stockService.Setup(x => x.GetRequiredStock(order, recipes))
-            .Returns(stock);
-        stockService.Setup(x => x.HasInsufficientStock(order, recipes, stock))
-            .ReturnsAsync(true);
+        stockService.Setup(x => x.TakeStock(requiredStock))
+            .ThrowsAsync(expectedException);
 
         var service = GetService(stockService.Object, recipeService.Object, pizzaOven.Object, orderRepository.Object);
 
         // Act
-        var ex = await Assert.ThrowsExceptionAsync<PizzaException>(() => service.HandlePizzaOrder(order, 1));
+        var actualException = await Assert.ThrowsExceptionAsync<PizzaException>(
+            () => service.HandlePizzaOrder(order, 1, requiredStock, recipes));
 
         // Assert
-        Assert.AreEqual("Unable to take in order. Insufficient stock.", ex.Message);
+        Assert.AreSame(expectedException, actualException);
         stockService.VerifyAll();
-        recipeService.VerifyAll();
         pizzaOven.VerifyNoOtherCalls();
     }
 
@@ -139,30 +126,23 @@ public class OrderingServiceTests
         ];
         var order = new PizzaOrder(requests);
         ComparableList<PizzaRecipeDto> recipes = [];
+        ComparableList<StockDto> requiredStock = [];
 
-        var stockService = new Mock<IStockService>();
-        var recipeService = new Mock<IRecipeService>(MockBehavior.Strict);
+        var stockService = new Mock<IStockService>(MockBehavior.Strict);
+        var recipeService = new Mock<IRecipeService>();
         var pizzaOven = new Mock<IPizzaOven>(MockBehavior.Strict);
         var orderRepository = new Mock<IOrderRepository>();
-
-        recipeService.Setup(x => x.GetPizzaRecipes(order))
-            .ReturnsAsync(recipes);
-        ComparableList<StockDto> stock = [];
-        stockService.Setup(x => x.GetRequiredStock(order, recipes))
-            .Returns(stock);
-        stockService.Setup(x => x.HasInsufficientStock(order, recipes, stock))
-            .ReturnsAsync(false);
 
         var service = GetService(stockService.Object, recipeService.Object, pizzaOven.Object, orderRepository.Object);
 
         // Act
-        var ex = await Assert.ThrowsExceptionAsync<PizzaException>(() => service.HandlePizzaOrder(order, 1));
+        var ex = await Assert.ThrowsExceptionAsync<PizzaException>(
+            () => service.HandlePizzaOrder(order, 1, requiredStock, recipes));
 
         // Assert
         Assert.AreEqual("Missing recipe. Recipe service did not return a recipe for id 1 which was expected.", ex.Message);
-        stockService.VerifyAll();
-        recipeService.VerifyAll();
-        pizzaOven.VerifyAll();
+        stockService.VerifyNoOtherCalls();
+        pizzaOven.VerifyNoOtherCalls();
     }
 
     [TestMethod]

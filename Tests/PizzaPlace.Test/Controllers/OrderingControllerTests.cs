@@ -17,11 +17,18 @@ public class OrderingControllerTests
     {
         // Arrange
         var order = new PizzaOrder([new PizzaAmount(1, 1)]);
+        var recipes = new ComparableList<PizzaRecipeDto>
+        {
+            new(PizzaRecipeType.StandardPizza, [], 10, 1)
+        };
+        var stock = new ComparableList<StockDto>();
 
         var orderingService = new Mock<IOrderingService>(MockBehavior.Strict);
-        long orderId = 1;
+        const long orderId = 1;
+        orderingService.Setup(x => x.PizzaCreationPossible(order))
+            .ReturnsAsync((recipes, stock));
         orderingService.Setup(x => x.CreatePizzaOrder(order)).ReturnsAsync(orderId);
-        orderingService.Setup(x => x.HandlePizzaOrder(order, orderId))
+        orderingService.Setup(x => x.HandlePizzaOrder(order, orderId, stock, recipes))
             .ReturnsAsync([]); // Doesn't matter.
 
         var controller = GetController(orderingService);

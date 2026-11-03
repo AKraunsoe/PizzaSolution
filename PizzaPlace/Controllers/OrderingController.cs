@@ -14,20 +14,13 @@ public class OrderingController(
     {
         var stockTuple = await orderingService.PizzaCreationPossible(pizzaOrder);
         var orderId = await orderingService.CreatePizzaOrder(pizzaOrder);
-        PlaceOrder(pizzaOrder, orderId, stockTuple.Item2, stockTuple.Item1);
+        orderingService.HandlePizzaOrder(pizzaOrder, orderId, requiredStock, recipes);
         return Ok(new
         {
             status = "Accepted",
             Id = orderId,
             message = "You order is being prepared, you can use the status endpoint to check it's status to see if it is done or not"
         });
-
-        async Task<IActionResult> PlaceOrder(PizzaOrder pizzaOrder, long orderId, ComparableList<StockDto> requiredStock, ComparableList<PizzaRecipeDto> recipes){
-            return Ok(new
-            {
-                pizzas = await orderingService.HandlePizzaOrder(pizzaOrder, orderId, requiredStock, recipes),
-            });
-        }
     }
 
     [HttpGet("status/{id:long}")]
